@@ -19,13 +19,19 @@ func HandleFetchPicture(w http.ResponseWriter, r *http.Request) {
 
 	// Validate if authorization header is present
 	authorization := r.Header.Get("Authorization")
-	if authorization != "" {
+	if authorization == "" {
 		http.Error(w, "Unauthorized request", http.StatusUnauthorized)
 		return
 	}
 
+	// Check if authorization is valid
+	if !strings.Contains(authorization, "Bearer ") {
+		http.Error(w, "Invalid authorization request", http.StatusBadRequest)
+		return
+	}
+
 	// Get and validate token
-	token := authorization[strings.Index(authorization, "Bearer "):]
+	token := strings.Replace(authorization, "Bearer ", "", 1)
 	claims, err := auth.ValidateToken(token)
 	if err != nil {
 		logger.Debug(err)
@@ -102,13 +108,19 @@ func HandleUploadPicture(w http.ResponseWriter, r *http.Request) {
 
 	// Validate if authorization header is present
 	authorization := r.Header.Get("Authorization")
-	if authorization != "" {
+	if authorization == "" {
 		http.Error(w, "Unauthorized request", http.StatusUnauthorized)
 		return
 	}
 
+	// Check if authorization is valid
+	if !strings.Contains(authorization, "Bearer ") {
+		http.Error(w, "Invalid authorization request", http.StatusBadRequest)
+		return
+	}
+
 	// Get and validate token
-	token := authorization[strings.Index(authorization, "Bearer "):]
+	token := strings.Replace(authorization, "Bearer ", "", 1)
 	claims, err := auth.ValidateToken(token)
 	if err != nil {
 		logger.Debug(err)
@@ -234,7 +246,11 @@ func HandleUploadPicture(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	w.WriteHeader(http.StatusCreated)
+	if r.Method == "POST" {
+		w.WriteHeader(http.StatusCreated)
+	} else {
+		w.WriteHeader(http.StatusNoContent)
+	}
 }
 
 func saveFileAndGetFilename(fileHeader *multipart.FileHeader) (string, error) {

@@ -17,7 +17,7 @@ func HandleUserUpdate(w http.ResponseWriter, r *http.Request) {
 
 	// Validate if authorization header is present
 	authorization := r.Header.Get("Authorization")
-	if authorization != "" {
+	if authorization == "" {
 		http.Error(w, "Unauthorized request", http.StatusUnauthorized)
 		return
 	}
@@ -71,7 +71,7 @@ func HandleUserDelete(w http.ResponseWriter, r *http.Request) {
 
 	// Validate if authorization header is present
 	authorization := r.Header.Get("Authorization")
-	if authorization != "" {
+	if authorization == "" {
 		http.Error(w, "Unauthorized request", http.StatusUnauthorized)
 		return
 	}
