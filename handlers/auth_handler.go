@@ -8,21 +8,22 @@ import (
 	"github.com/AlexWilliam12/silent-signal/auth"
 	"github.com/AlexWilliam12/silent-signal/client"
 	"github.com/AlexWilliam12/silent-signal/configs"
-	"github.com/AlexWilliam12/silent-signal/database"
-	"github.com/gorilla/websocket"
+	"github.com/AlexWilliam12/silent-signal/database/repositories"
 )
 
 // Handler to process the client authentication request
 func HandleLogin(w http.ResponseWriter, r *http.Request) {
 	logger := configs.NewLogger("handlers")
 
-	var user client.Auth
+	// Get client request body
+	var user client.UserRequest
 	if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
 		http.Error(w, "Invalid JSON body", http.StatusBadRequest)
 		return
 	}
 
-	if _, err := database.FindUser(user); err != nil {
+	// Fetch in database querying by user credentials
+	if _, err := repositories.FindUserByCredentials(user); err != nil {
 		if strings.Contains(err.Error(), "record not found") {
 			http.Error(w, "Invalid credentials", http.StatusNotFound)
 		} else {
@@ -32,6 +33,7 @@ func HandleLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Generate JWT token for user
 	token, err := auth.GenerateToken(user.Username)
 	if err != nil {
 		logger.Err(err)
@@ -42,17 +44,19 @@ func HandleLogin(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(client.JWTToken{Token: token})
 }
 
-// Handler to process a request to register a user
+// Handler to process a request to register user
 func HandleRegister(w http.ResponseWriter, r *http.Request) {
 	logger := configs.NewLogger("handlers")
 
-	var user client.Auth
+	// Get client request body
+	var user client.UserRequest
 	if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
 		http.Error(w, "Invalid JSON body", http.StatusBadRequest)
 		return
 	}
 
-	if _, err := database.CreateUser(user); err != nil {
+	// Save a user on database
+	if _, err := repositories.CreateUser(user); err != nil {
 		if strings.Contains(err.Error(), "duplicate key") {
 			http.Error(w, "Username is already in use", http.StatusBadRequest)
 		} else {
@@ -63,33 +67,4 @@ func HandleRegister(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusCreated)
-}
-
-// Upgrade the HTTP protocol to Web Socket protocol
-var upgrader = websocket.Upgrader{
-	ReadBufferSize:  1024,
-	WriteBufferSize: 1024,
-}
-
-// Handler to process bidirectional requests on private chats
-func HandlePrivateChat(w http.ResponseWriter, r *http.Request) {
-	logger := configs.NewLogger("handlers")
-
-	conn, err := upgrader.Upgrade(w, r, nil)
-	if err != nil {
-		logger.Debugf("Failed to upgrade to web socket: %v", err)
-	}
-	defer conn.Close()
-
-}
-
-// Handler to process bidirectional requests on group chats
-func HandleGroupChat(w http.ResponseWriter, r *http.Request) {
-	logger := configs.NewLogger("handlers")
-
-	conn, err := upgrader.Upgrade(w, r, nil)
-	if err != nil {
-		logger.Debugf("Failed to upgrade to web socket: %v", err)
-	}
-	defer conn.Close()
 }

@@ -4,8 +4,9 @@ import "gorm.io/gorm"
 
 type User struct {
 	gorm.Model
-	Username         string           `gorm:"uniqueIndex;not null;index"`
-	Password         string           `gorm:"not null"`
+	Username         string `gorm:"uniqueIndex;not null;index"`
+	Password         string `gorm:"not null"`
+	Picture          string
 	SentMessages     []PrivateMessage `gorm:"foreignKey:SenderID"`
 	ReceivedMessages []PrivateMessage `gorm:"foreignKey:ReceiverID"`
 	Groups           []Group          `gorm:"many2many:user_groups;"`
@@ -23,6 +24,8 @@ type PrivateMessage struct {
 type Group struct {
 	gorm.Model
 	Name          string `gorm:"not null;uniqueIndex;index"`
+	Description   string
+	Picture       string
 	CreatorID     uint
 	Creator       User   `gorm:"not null;foreignKey:CreatorID"`
 	Members       []User `gorm:"many2many:user_groups;"`

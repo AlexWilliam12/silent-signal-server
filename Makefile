@@ -1,5 +1,5 @@
 APP=silent-signal
-SRC=cmd/app/main.go
+SRC=main.go
 TARGET=target/bin
 
 .PHONK: build

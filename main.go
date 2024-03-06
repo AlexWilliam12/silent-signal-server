@@ -25,6 +25,14 @@ func main() {
 
 	r.HandleFunc("/auth/login", handlers.HandleLogin).Methods("POST")
 	r.HandleFunc("/auth/register", handlers.HandleRegister).Methods("POST")
+
+	r.HandleFunc("/user", handlers.HandleUserUpdate).Methods("PUT")
+	r.HandleFunc("/user", handlers.HandleUserDelete).Methods("DELETE")
+
+	r.HandleFunc("/upload/picture", handlers.HandleFetchPicture).Methods("GET")
+	r.HandleFunc("/upload/picture", handlers.HandleUploadPicture).Methods("POST", "PUT")
+	r.PathPrefix("/uploads/").Handler(http.StripPrefix("/uploads/", http.FileServer(http.Dir("uploads")))).Methods("GET")
+
 	r.HandleFunc("/chat/private", handlers.HandlePrivateChat)
 	r.HandleFunc("/chat/group", handlers.HandleGroupChat)
 
