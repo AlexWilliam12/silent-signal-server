@@ -4,6 +4,12 @@ TARGET=target/bin
 
 .PHONK: build
 build:
+	@if [ ! -d "$(TARGET)" ]; then \
+		mkdir -p "$(TARGET)"; \
+	fi
+	@if [ ! -d "uploads" ]; then \
+		mkdir -p "uploads"; \
+	fi
 	@echo "Building the app $(APP)..."
 	go build -o $(TARGET)/$(APP) $(SRC)
 	@echo "Build has finished"

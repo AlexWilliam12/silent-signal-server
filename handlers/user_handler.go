@@ -22,8 +22,14 @@ func HandleUserUpdate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Check if authorization is valid
+	if !strings.Contains(authorization, "Bearer ") {
+		http.Error(w, "Invalid authorization request", http.StatusBadRequest)
+		return
+	}
+
 	// Get and validate token
-	token := authorization[strings.Index(authorization, "Bearer "):]
+	token := strings.Replace(authorization, "Bearer ", "", 1)
 	claims, err := auth.ValidateToken(token)
 	if err != nil {
 		logger.Debug(err)
@@ -54,6 +60,9 @@ func HandleUserUpdate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	fetchedUser.Username = user.Username
+	fetchedUser.Password = user.Password
+
 	// Update user on database
 	_, err = repositories.UpdateUser(fetchedUser)
 	if err != nil {
@@ -76,6 +85,21 @@ func HandleUserDelete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Check if authorization is valid
+	if !strings.Contains(authorization, "Bearer ") {
+		http.Error(w, "Invalid authorization request", http.StatusBadRequest)
+		return
+	}
+
+	// Get and validate token
+	token := strings.Replace(authorization, "Bearer ", "", 1)
+	claims, err := auth.ValidateToken(token)
+	if err != nil {
+		logger.Debug(err)
+		http.Error(w, "Unauthorized request", http.StatusUnauthorized)
+		return
+	}
+
 	// Get all query parameters
 	queryParams := r.URL.Query()
 
@@ -84,15 +108,6 @@ func HandleUserDelete(w http.ResponseWriter, r *http.Request) {
 
 	if userParam == "" {
 		http.Error(w, "No username specified", http.StatusBadRequest)
-		return
-	}
-
-	// Get and validate token
-	token := authorization[strings.Index(authorization, "Bearer "):]
-	claims, err := auth.ValidateToken(token)
-	if err != nil {
-		logger.Debug(err)
-		http.Error(w, "Unauthorized request", http.StatusUnauthorized)
 		return
 	}
 
