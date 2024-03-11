@@ -5,10 +5,10 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/AlexWilliam12/silent-signal/auth"
-	"github.com/AlexWilliam12/silent-signal/client"
-	"github.com/AlexWilliam12/silent-signal/configs"
-	"github.com/AlexWilliam12/silent-signal/database/repositories"
+	"github.com/AlexWilliam12/silent-signal/internal/auth"
+	"github.com/AlexWilliam12/silent-signal/internal/client"
+	"github.com/AlexWilliam12/silent-signal/internal/configs"
+	"github.com/AlexWilliam12/silent-signal/internal/database/repositories"
 )
 
 // Handler to process the client authentication request
@@ -22,7 +22,7 @@ func HandleLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Fetch in database querying by user credentials
+	// Fetch user on database querying by user credentials
 	if _, err := repositories.FindUserByCredentials(user); err != nil {
 		if strings.Contains(err.Error(), "record not found") {
 			http.Error(w, "Invalid credentials", http.StatusNotFound)
@@ -57,10 +57,10 @@ func HandleRegister(w http.ResponseWriter, r *http.Request) {
 
 	// Save a user on database
 	if _, err := repositories.CreateUser(user); err != nil {
+		logger.Err(err)
 		if strings.Contains(err.Error(), "duplicate key") {
 			http.Error(w, "Username is already in use", http.StatusBadRequest)
 		} else {
-			logger.Err(err)
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		}
 		return

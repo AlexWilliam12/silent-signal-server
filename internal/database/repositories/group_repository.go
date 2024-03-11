@@ -1,16 +1,23 @@
 package repositories
 
 import (
-	"github.com/AlexWilliam12/silent-signal/client"
-	"github.com/AlexWilliam12/silent-signal/database"
-	"github.com/AlexWilliam12/silent-signal/database/models"
+	"github.com/AlexWilliam12/silent-signal/internal/database"
+	"github.com/AlexWilliam12/silent-signal/internal/database/models"
 )
 
 // Create a group on database
-func CreateGroup(group client.GroupRequest) (int64, error) {
+func CreateGroup(group *models.Group) (int64, error) {
 	db := database.OpenConn()
-	result := db.Select("name").Create(&models.Group{Name: group.Name})
+	result := db.Create(group)
 	return result.RowsAffected, result.Error
+}
+
+// Fetch all groups from database
+func FindAllGroups() ([]models.Group, error) {
+	db := database.OpenConn()
+	var groups []models.Group
+	result := db.Find(&groups)
+	return groups, result.Error
 }
 
 // Find a group on database querying by group name
@@ -22,7 +29,7 @@ func FindGroupByName(groupName string) (*models.Group, error) {
 }
 
 // Update group informations
-func UpdateGroup(group client.GroupRequest) (int64, error) {
+func UpdateGroup(group *models.Group) (int64, error) {
 	db := database.OpenConn()
 	result := db.Save(&group)
 	return result.RowsAffected, result.Error

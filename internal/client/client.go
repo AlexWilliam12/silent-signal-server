@@ -1,7 +1,5 @@
 package client
 
-import "github.com/gorilla/websocket"
-
 // JSON user request object
 type UserRequest struct {
 	Username string `json:"username"`
@@ -12,6 +10,7 @@ type UserRequest struct {
 type GroupRequest struct {
 	Name        string `json:"name"`
 	Description string `json:"description"`
+	Creator     string `json:"creator"`
 }
 
 // JSON user response object
@@ -22,8 +21,10 @@ type UserResponse struct {
 
 // JSON user response object
 type GroupResponse struct {
-	Name       string `json:"name"`
-	PictureURL string `json:"pictureURL"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	Creator     string `json:"creator"`
+	PictureURL  string `json:"pictureURL"`
 }
 
 // Token response to the client
@@ -31,8 +32,18 @@ type JWTToken struct {
 	Token string `json:"token"`
 }
 
-type Connection struct {
-	UserID  string
-	GroupID string
-	Conn    *websocket.Conn
+type PrivateMessage struct {
+	Sender   string `json:"sender"`
+	Receiver string `json:"receiver"`
+	Data     string `json:"data"`
 }
+
+type GroupMessage struct {
+	Sender string `json:"sender"`
+	Group  string `json:"group"`
+	Data   string `json:"data"`
+}
+
+// type WebSocketError struct {
+// 	Err string `json:"error"`
+// }

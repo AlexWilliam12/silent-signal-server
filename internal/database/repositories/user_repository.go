@@ -1,9 +1,9 @@
 package repositories
 
 import (
-	"github.com/AlexWilliam12/silent-signal/client"
-	"github.com/AlexWilliam12/silent-signal/database"
-	"github.com/AlexWilliam12/silent-signal/database/models"
+	"github.com/AlexWilliam12/silent-signal/internal/client"
+	"github.com/AlexWilliam12/silent-signal/internal/database"
+	"github.com/AlexWilliam12/silent-signal/internal/database/models"
 )
 
 // Create a user on database

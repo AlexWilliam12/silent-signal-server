@@ -6,36 +6,19 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/AlexWilliam12/silent-signal/auth"
-	"github.com/AlexWilliam12/silent-signal/client"
-	"github.com/AlexWilliam12/silent-signal/configs"
-	"github.com/AlexWilliam12/silent-signal/database/repositories"
-	"github.com/AlexWilliam12/silent-signal/services"
+	"github.com/AlexWilliam12/silent-signal/internal/client"
+	"github.com/AlexWilliam12/silent-signal/internal/configs"
+	"github.com/AlexWilliam12/silent-signal/internal/database/repositories"
+	"github.com/AlexWilliam12/silent-signal/internal/services"
 )
 
 // Handler to fetch image queried by user or group name
 func HandleFetchPicture(w http.ResponseWriter, r *http.Request) {
 	logger := configs.NewLogger("handlers")
 
-	// Validate if authorization header is present
-	authorization := r.Header.Get("Authorization")
-	if authorization == "" {
-		http.Error(w, "Unauthorized request", http.StatusUnauthorized)
-		return
-	}
-
-	// Check if authorization is valid
-	if !strings.Contains(authorization, "Bearer ") {
-		http.Error(w, "Invalid authorization request", http.StatusBadRequest)
-		return
-	}
-
-	// Get and validate token
-	token := strings.Replace(authorization, "Bearer ", "", 1)
-	claims, err := auth.ValidateToken(token)
+	// Check if token is valid
+	claims, err := handleAuthorization(w, r)
 	if err != nil {
-		logger.Debug(err)
-		http.Error(w, "Unauthorized request", http.StatusUnauthorized)
 		return
 	}
 
@@ -106,25 +89,9 @@ func HandleFetchPicture(w http.ResponseWriter, r *http.Request) {
 func HandleUploadPicture(w http.ResponseWriter, r *http.Request) {
 	logger := configs.NewLogger("handlers")
 
-	// Validate if authorization header is present
-	authorization := r.Header.Get("Authorization")
-	if authorization == "" {
-		http.Error(w, "Unauthorized request", http.StatusUnauthorized)
-		return
-	}
-
-	// Check if authorization is valid
-	if !strings.Contains(authorization, "Bearer ") {
-		http.Error(w, "Invalid authorization request", http.StatusBadRequest)
-		return
-	}
-
-	// Get and validate token
-	token := strings.Replace(authorization, "Bearer ", "", 1)
-	claims, err := auth.ValidateToken(token)
+	// Check if token is valid
+	claims, err := handleAuthorization(w, r)
 	if err != nil {
-		logger.Debug(err)
-		http.Error(w, "Unauthorized request", http.StatusUnauthorized)
 		return
 	}
 

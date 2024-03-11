@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/AlexWilliam12/silent-signal/configs"
-	"github.com/AlexWilliam12/silent-signal/handlers"
+	"github.com/AlexWilliam12/silent-signal/internal/configs"
+	"github.com/AlexWilliam12/silent-signal/internal/handlers"
 	"github.com/gorilla/mux"
 )
 
@@ -33,8 +33,10 @@ func main() {
 	r.HandleFunc("/upload/picture", handlers.HandleUploadPicture).Methods("POST", "PUT")
 	r.PathPrefix("/uploads/").Handler(http.StripPrefix("/uploads/", http.FileServer(http.Dir("uploads")))).Methods("GET")
 
-	r.HandleFunc("/chat/private", handlers.HandlePrivateChat)
-	r.HandleFunc("/chat/group", handlers.HandleGroupChat)
+	r.HandleFunc("/chat/private", handlers.HandlePrivateConnections)
+	go handlers.HandlePrivateMessages()
+
+	r.HandleFunc("/chat/group", handlers.HandleGroupMessages)
 
 	port := ":" + os.Getenv("SERVER_PORT")
 

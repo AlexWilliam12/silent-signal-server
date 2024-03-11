@@ -3,7 +3,7 @@ package configs
 import (
 	"fmt"
 
-	"github.com/AlexWilliam12/silent-signal/database"
+	"github.com/AlexWilliam12/silent-signal/internal/database"
 	"github.com/joho/godotenv"
 )
 

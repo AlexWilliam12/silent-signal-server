@@ -5,7 +5,7 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/AlexWilliam12/silent-signal/database/models"
+	"github.com/AlexWilliam12/silent-signal/internal/database/models"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )

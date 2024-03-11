@@ -18,7 +18,8 @@ type PrivateMessage struct {
 	ReceiverID uint
 	Sender     User   `gorm:"foreignKey:SenderID"`
 	Receiver   User   `gorm:"foreignKey:ReceiverID"`
-	Data       []byte `gorm:"not null"`
+	Data       string `gorm:"not null"`
+	IsPending  bool   `gorm:"not null"`
 }
 
 type Group struct {
@@ -37,5 +38,5 @@ type GroupMessage struct {
 	SenderID uint
 	GroupID  uint   `gorm:"foreignKey:GroupID"`
 	Sender   User   `gorm:"foreignKey:SenderID"`
-	Data     []byte `gorm:"not null"`
+	Data     string `gorm:"not null"`
 }
