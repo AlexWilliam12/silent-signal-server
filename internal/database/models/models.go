@@ -4,12 +4,14 @@ import "gorm.io/gorm"
 
 type User struct {
 	gorm.Model
+	Email            string `gorm:"uniqueIndex;not null;index"`
 	Username         string `gorm:"uniqueIndex;not null;index"`
 	Password         string `gorm:"not null"`
 	Picture          string
 	SentMessages     []PrivateMessage `gorm:"foreignKey:SenderID"`
 	ReceivedMessages []PrivateMessage `gorm:"foreignKey:ReceiverID"`
-	Groups           []Group          `gorm:"many2many:user_groups;"`
+	Groups           []*Group         `gorm:"many2many:group_members;"`
+	Contacts         []*User          `gorm:"many2many:user_contacts;association_jointable_foreignkey:contact_id"`
 }
 
 type PrivateMessage struct {
@@ -18,7 +20,8 @@ type PrivateMessage struct {
 	ReceiverID uint
 	Sender     User   `gorm:"foreignKey:SenderID"`
 	Receiver   User   `gorm:"foreignKey:ReceiverID"`
-	Data       string `gorm:"not null"`
+	Type       string `gorm:"not null"`
+	Content    string `gorm:"not null"`
 	IsPending  bool   `gorm:"not null"`
 }
 
@@ -28,15 +31,18 @@ type Group struct {
 	Description   string
 	Picture       string
 	CreatorID     uint
-	Creator       User   `gorm:"not null;foreignKey:CreatorID"`
-	Members       []User `gorm:"many2many:user_groups;"`
+	Creator       User    `gorm:"not null;foreignKey:CreatorID"`
+	Members       []*User `gorm:"many2many:group_members;"`
 	GroupMessages []GroupMessage
 }
 
 type GroupMessage struct {
 	gorm.Model
 	SenderID uint
-	GroupID  uint   `gorm:"foreignKey:GroupID"`
-	Sender   User   `gorm:"foreignKey:SenderID"`
-	Data     string `gorm:"not null"`
+	GroupID  uint
+	Group    Group   `gorm:"foreignKey:GroupID"`
+	Sender   User    `gorm:"foreignKey:SenderID"`
+	SeenBy   []*User `gorm:"many2many:group_message_seen_by;"`
+	Type     string  `gorm:"not null"`
+	Content  string  `gorm:"not null"`
 }

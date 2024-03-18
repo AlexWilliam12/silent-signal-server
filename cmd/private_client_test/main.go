@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"net/http"
 
 	"github.com/AlexWilliam12/silent-signal/internal/client"
 	"github.com/gorilla/websocket"
@@ -9,11 +10,11 @@ import (
 
 func main() {
 
-	// var token string
-	// fmt.Print("Your token: ")
-	// if _, err := fmt.Scanln(&token); err != nil {
-	// 	panic(err)
-	// }
+	var token string
+	fmt.Print("Your token: ")
+	if _, err := fmt.Scanln(&token); err != nil {
+		panic(err)
+	}
 
 	var sender string
 	fmt.Print("Your name: ")
@@ -28,11 +29,11 @@ func main() {
 	}
 
 	url := "ws://localhost:8080/chat/private"
-	// headers := http.Header{}
-	// headers.Set("Authorization", fmt.Sprintf("Bearer %s", token))
+	headers := http.Header{}
+	headers.Set("Authorization", fmt.Sprintf("Bearer %s", token))
 
 	dialer := websocket.DefaultDialer
-	conn, _, err := dialer.Dial(url, nil)
+	conn, _, err := dialer.Dial(url, headers)
 	if err != nil {
 		panic(err)
 	}
@@ -46,7 +47,7 @@ func main() {
 				panic(err)
 			}
 
-			fmt.Println(response.Data)
+			fmt.Println(response.Message)
 		}
 	}()
 
@@ -62,7 +63,7 @@ func main() {
 			break
 		}
 
-		err = conn.WriteJSON(client.PrivateMessage{Sender: sender, Receiver: receiver, Data: input})
+		err = conn.WriteJSON(client.PrivateMessage{Sender: sender, Receiver: receiver, Message: input})
 		if err != nil {
 			panic(err)
 		}

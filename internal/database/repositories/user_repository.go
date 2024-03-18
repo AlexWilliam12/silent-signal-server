@@ -6,22 +6,30 @@ import (
 	"github.com/AlexWilliam12/silent-signal/internal/database/models"
 )
 
-// Create a user on database
 func CreateUser(user client.UserRequest) (int64, error) {
 	db := database.OpenConn()
-	result := db.Select("username", "password").Create(&models.User{Username: user.Username, Password: user.Password})
+	result := db.Select("email", "username", "password").Create(&models.User{
+		Email:    user.Email,
+		Username: user.Username,
+		Password: user.Password,
+	})
 	return result.RowsAffected, result.Error
 }
 
-// Find a single user on database querying by credentials
-func FindUserByCredentials(user client.UserRequest) (*models.User, error) {
+func FetchAllByUserames(username []string) ([]*models.User, error) {
 	db := database.OpenConn()
-	var userQueried models.User
-	result := db.Where("users.username = ? AND users.password = ?", user.Username, user.Password).First(&userQueried)
-	return &userQueried, result.Error
+	var users []*models.User
+	result := db.Where("users.username IN ?", username).Find(users)
+	return users, result.Error
 }
 
-// Find a single user on database querying by username
+func FindUserByCredentials(user client.UserRequest) (*models.User, error) {
+	db := database.OpenConn()
+	var persistedUser models.User
+	result := db.Where("users.username = ? AND users.password = ?", user.Username, user.Password).First(&persistedUser)
+	return &persistedUser, result.Error
+}
+
 func FindUserByName(username string) (*models.User, error) {
 	db := database.OpenConn()
 	var userQueried models.User
@@ -29,16 +37,30 @@ func FindUserByName(username string) (*models.User, error) {
 	return &userQueried, result.Error
 }
 
-// Update user credentials
-func UpdateUser(user *models.User) (int64, error) {
+func UpdateUser(username string, request *client.UserRequest) (int64, error) {
+	user, err := FindUserByName(username)
+	if err != nil {
+		return 0, err
+	}
+
+	user.Email = request.Email
+	user.Username = request.Username
+	user.Password = request.Password
+
 	db := database.OpenConn()
 	result := db.Save(user)
 	return result.RowsAffected, result.Error
 }
 
-// Delete user on database where name matches
 func DeleteUserByName(username string) (int64, error) {
 	db := database.OpenConn()
 	result := db.Unscoped().Where("users.username = ?", username).Delete(&models.User{})
+	return result.RowsAffected, result.Error
+}
+
+func SaveContact(user *models.User, contact *models.User) (int64, error) {
+	db := database.OpenConn()
+	user.Contacts = append(user.Contacts, contact)
+	result := db.Save(user)
 	return result.RowsAffected, result.Error
 }

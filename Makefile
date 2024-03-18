@@ -18,8 +18,8 @@ build:
 run: build
 	@./$(TARGET)/$(APP)
 
-.PHONK: clear
-clear:
+.PHONK: clean
+clean:
 	@echo "Cleaning binaries..."
 	@rm $(TARGET)/$(APP)
 	@echo "Clear has finished"

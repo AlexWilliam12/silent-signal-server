@@ -10,14 +10,10 @@ import (
 	"github.com/gorilla/mux"
 )
 
-var logger *configs.Logger
-
 func init() {
-	logger = configs.NewLogger("main")
-
-	logger.Debug("Running initializers...")
+	log.Println("Running initializers...")
 	configs.Init()
-	logger.Debug("Initalizers were finished successufully")
+	log.Println("Initalizers were finished successufully")
 }
 
 func main() {
@@ -40,6 +36,6 @@ func main() {
 
 	port := ":" + os.Getenv("SERVER_PORT")
 
-	logger.Infof("Server is running on port %s", port[1:])
+	log.Printf("Server is running on port %s", port[1:])
 	log.Fatal(http.ListenAndServe(port, r))
 }
