@@ -101,7 +101,7 @@ func saveGroupMessages(message *client.GroupMessage, group *models.Group) {
 		Sender:  *sender,
 		Group:   *group,
 		Type:    "text",
-		Content: message.Message,
+		Content: message.Message.Content,
 		SeenBy:  users,
 	})
 	if err != nil {
@@ -120,9 +120,12 @@ func sendPendingGroupMessages(username string, conn *websocket.Conn) {
 
 	for _, message := range messages {
 		err := conn.WriteJSON(client.GroupMessage{
-			Sender:  message.Sender.Username,
-			Group:   message.Group.Name,
-			Message: message.Content,
+			Sender: message.Sender.Username,
+			Group:  message.Group.Name,
+			Message: client.Message{
+				Type:    "text",
+				Content: message.Content,
+			},
 		})
 		if err != nil {
 			log.Println(err)

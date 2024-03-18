@@ -197,12 +197,13 @@ func HandleChatUpload(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, fileHeader, err := r.FormFile("file")
+	file, fileHeader, err := r.FormFile("file")
 	if err != nil {
 		log.Println(err)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
+	defer file.Close()
 
 	filename, err := saveFileAndGetFilename(fileHeader)
 	if err != nil {
@@ -211,6 +212,8 @@ func HandleChatUpload(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	fileType := fileHeader.Header.Get("Content-Type")
+
 	if groupParam != "" {
 		sender, err := repositories.FindUserByName(claims.Username)
 		if err != nil {
@@ -218,17 +221,68 @@ func HandleChatUpload(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
+		fileUrl := services.BuildFileURL(filename)
 		_, err = repositories.SaveGroupMessage(&models.GroupMessage{
 			Sender:  *sender,
 			Group:   *group,
-			Type:    fileHeader.Header.Get("Content-Type"),
-			Content: services.BuildFileURL(filename),
+			Type:    fileType,
+			Content: fileUrl,
 		})
 		if err != nil {
 			log.Println(err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
+
+		var encodedFile string
+
+		switch fileType {
+		case
+			"image/jpg",
+			"image/jpeg",
+			"image/gif",
+			"image/png",
+			"image/webp",
+			"image/svg+xml",
+			"image/bmp",
+			"image/tiff":
+			if encodedFile, err = services.EncodedImgThumbnail(&file); err != nil {
+				log.Println(err)
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+		case
+			"video/mp4",
+			"video/x-msvideo",
+			"video/quicktime",
+			"video/x-ms-wmv",
+			"video/x-matroska",
+			"video/x-flv",
+			"video/webm",
+			"video/3gpp":
+			if encodedFile, err = services.EncodedVideoThumbnail(&file, fileType[strings.Index(fileType, "/"):]); err != nil {
+				log.Println(err)
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+		}
+
+		if conns, ok := groupConns[groupParam]; ok {
+			for _, conn := range conns {
+				if conn.Username != claims.Username {
+					conn.Conn.WriteJSON(client.GroupMessage{
+						Sender: sender.Username,
+						Group:  group.Name,
+						Message: client.Message{
+							Type:    fileType,
+							Content: encodedFile,
+							Link:    &fileUrl,
+						},
+					})
+				}
+			}
+		}
+
 	} else {
 		sender, err := repositories.FindUserByName(claims.Username)
 		if err != nil {
@@ -239,7 +293,7 @@ func HandleChatUpload(w http.ResponseWriter, r *http.Request) {
 		_, err = repositories.SavePrivateMessage(&models.PrivateMessage{
 			Sender:   *sender,
 			Receiver: *receiver,
-			Type:     fileHeader.Header.Get("Content-Type"),
+			Type:     fileType,
 			Content:  services.BuildFileURL(filename),
 		})
 		if err != nil {

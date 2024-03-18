@@ -82,9 +82,10 @@ func savePrivateMessages(message *client.PrivateMessage, isPending bool) {
 	}
 
 	_, err = repositories.SavePrivateMessage(&models.PrivateMessage{
-		Sender:   *sender,
-		Receiver: *receiver,
-		Type:     "text", Content: message.Message,
+		Sender:    *sender,
+		Receiver:  *receiver,
+		Type:      "text",
+		Content:   message.Message.Content,
 		IsPending: isPending,
 	})
 	if err != nil {
@@ -110,7 +111,10 @@ func sendPendingPrivateMessages(username string) {
 			response := client.PrivateMessage{
 				Sender:   message.Sender.Username,
 				Receiver: message.Receiver.Username,
-				Message:  message.Content,
+				Message: client.Message{
+					Type:    "text",
+					Content: message.Content,
+				},
 			}
 			if err = conn.WriteJSON(&response); err != nil {
 				log.Println(err)

@@ -30,16 +30,22 @@ type JWTToken struct {
 	Token string `json:"token"`
 }
 
+type Message struct {
+	Type    string  `gorm:"type"`
+	Content string  `gorm:"content"`
+	Link    *string `gorm:"link,omitempty"`
+}
+
 type PrivateMessage struct {
-	Sender   string `json:"sender"`
-	Receiver string `json:"receiver"`
-	Message  string `json:"message"`
+	Sender   string  `json:"sender"`
+	Receiver string  `json:"receiver"`
+	Message  Message `json:"message"`
 }
 
 type GroupMessage struct {
-	Sender  string `json:"sender"`
-	Group   string `json:"group"`
-	Message string `json:"message"`
+	Sender  string  `json:"sender"`
+	Group   string  `json:"group"`
+	Message Message `json:"message"`
 }
 
 type ContactRequest struct {

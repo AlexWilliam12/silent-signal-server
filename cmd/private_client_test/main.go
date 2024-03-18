@@ -63,7 +63,13 @@ func main() {
 			break
 		}
 
-		err = conn.WriteJSON(client.PrivateMessage{Sender: sender, Receiver: receiver, Message: input})
+		err = conn.WriteJSON(client.PrivateMessage{
+			Sender:   sender,
+			Receiver: receiver,
+			Message: client.Message{
+				Type:    "text",
+				Content: input,
+			}})
 		if err != nil {
 			panic(err)
 		}
