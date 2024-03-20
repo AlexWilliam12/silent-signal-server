@@ -23,10 +23,10 @@ func FetchAllByUserames(username []string) ([]*models.User, error) {
 	return users, result.Error
 }
 
-func FindUserByCredentials(user client.UserRequest) (*models.User, error) {
+func FindUserByCredentials(user *client.AuthRequest) (*models.User, error) {
 	db := database.OpenConn()
 	var persistedUser models.User
-	result := db.Where("users.username = ? AND users.password = ?", user.Username, user.Password).First(&persistedUser)
+	result := db.Where("email = ? AND password = ?", user.Email, user.Password).First(&persistedUser)
 	return &persistedUser, result.Error
 }
 

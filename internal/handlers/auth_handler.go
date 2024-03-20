@@ -12,14 +12,15 @@ import (
 
 func HandleLogin(w http.ResponseWriter, r *http.Request) {
 
-	var user client.UserRequest
-	if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
+	var request client.AuthRequest
+	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
 		log.Println(err)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	if _, err := repositories.FindUserByCredentials(user); err != nil {
+	user, err := repositories.FindUserByCredentials(&request)
+	if err != nil {
 		log.Println(err)
 		http.Error(w, err.Error(), http.StatusNotFound)
 		return

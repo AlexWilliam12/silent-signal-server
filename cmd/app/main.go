@@ -24,6 +24,7 @@ func main() {
 
 	r.HandleFunc("/user", handlers.HandleUserUpdate).Methods("PUT")
 	r.HandleFunc("/user", handlers.HandleUserDelete).Methods("DELETE")
+	r.HandleFunc("/user/contact", handlers.HandleSaveContact).Methods("POST")
 
 	r.HandleFunc("/upload/picture", handlers.HandleFetchPicture).Methods("GET")
 	r.HandleFunc("/upload/picture", handlers.HandleUploadPicture).Methods("POST", "PUT")
